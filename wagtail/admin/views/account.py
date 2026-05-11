@@ -423,10 +423,10 @@ class LogoutView(auth_views.LogoutView):
     def next_page(self):
         return getattr(settings, "WAGTAILADMIN_LOGIN_URL", "wagtailadmin_login")
 
-    def dispatch(self, request, *args, **kwargs):
-        response = super().dispatch(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
 
-        messages.success(self.request, _("You have been successfully logged out."))
+        messages.success(request, _("You have been successfully logged out."))
         # By default, logging out will generate a fresh sessionid cookie. We want to use the
         # absence of sessionid as an indication that front-end pages are being viewed by a
         # non-logged-in user and are therefore cacheable, so we forcibly delete the cookie here.
@@ -438,6 +438,6 @@ class LogoutView(auth_views.LogoutView):
 
         # HACK: pretend that the session hasn't been modified, so that SessionMiddleware
         # won't override the above and write a new cookie.
-        self.request.session.modified = False
+        request.session.modified = False
 
         return response

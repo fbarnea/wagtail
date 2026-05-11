@@ -124,6 +124,25 @@ class TestAuthentication(WagtailTestUtils, TestCase):
         # Check that the user was logged out
         self.assertNotIn("_auth_user_id", self.client.session)
 
+    def test_logout_get_request_does_not_log_out(self):
+        """
+        A GET request to the logout URL should return 405 and not log
+        the user out.
+        """
+        self.login()
+
+        response = self.client.get(reverse("wagtailadmin_logout"))
+        self.assertEqual(response.status_code, 405)
+
+        # Verify the user is still logged in
+        self.assertIn("_auth_user_id", self.client.session)
+
+        # Verify no success message was set
+        response = self.client.get(reverse("wagtailadmin_home"))
+        self.assertEqual(response.status_code, 200)
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 0)
+
     @override_settings(WAGTAILADMIN_LOGIN_URL="fallback")
     def test_logout_redirect_with_custom_login_url(self):
         """
